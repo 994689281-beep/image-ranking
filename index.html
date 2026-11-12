@@ -28,7 +28,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>
     const db=supabase.createClient('https://ryfksqgkdkeptoryduuk.supabase.co','sb_publishable_-pmyLgDNzYeJVk_FumrwGg_heMsW_6t');
     const id=document.querySelector('#userId'), file=document.querySelector('#image'), preview=document.querySelector('#preview'), submit=document.querySelector('#submit'), text=document.querySelector('#uploadText'), notice=document.querySelector('#notice'); let selectedFile=null;
-    function check(){submit.disabled=!id.value.trim()||!imageData}
+    function check(){submit.disabled=!id.value.trim()||!selectedFile}
     file.addEventListener('change',()=>{const f=file.files[0];if(!f)return;if(f.size>5*1024*1024){alert('图片不能超过 5MB');file.value='';return}selectedFile=f;preview.src=URL.createObjectURL(f);preview.style.display='block';text.textContent=f.name;check()});id.addEventListener('input',check);
     submit.addEventListener('click',async()=>{submit.disabled=true;submit.textContent='上传中...';try{const path=`${crypto.randomUUID()}-${selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;const upload=await db.storage.from('images').upload(path,selectedFile,{contentType:selectedFile.type});if(upload.error)throw upload.error;const image_url=db.storage.from('images').getPublicUrl(path).data.publicUrl;const result=await db.from('submissions').insert({user_id:id.value.trim(),image_url}).select().single();if(result.error)throw result.error;notice.textContent='提交成功，已进入排行榜';notice.style.display='block';submit.textContent='已提交'}catch(e){notice.textContent='提交失败：'+e.message;notice.style.display='block';submit.disabled=false;submit.textContent='提交'}});
   </script>
